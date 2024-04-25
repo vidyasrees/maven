@@ -7,7 +7,7 @@ pipeline
         {
             steps
             {
-                git 'https://github.com/intelliqittrainings/maven.git'
+                git 'https://github.com/vidyasrees/maven.git'
             }
         }
         stage('ContinuousBuild')
@@ -21,37 +21,24 @@ pipeline
         {
             steps
             {
-               deploy adapters: [tomcat9(credentialsId: 'bfb67f1d-2f4e-430c-bb8d-30584116bd00', path: '', url: 'http://172.31.51.212:9090')], contextPath: 'test1', war: '**/*.war'
+                sh 'scp /var/lib/jenkins/workspace/DeclarativePipeline-SCP/webapp/target/webapp.war ubuntu@172.31.5.63:/var/lib/tomcat9/webapps/testapp.war'
             }
         }
         stage('ContinuousTesting')
         {
             steps
             {
-               git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
-               sh 'java -jar /home/ubuntu/.jenkins/workspace/DeclarativePipeline1/testing.jar'
+                git 'https://github.com/vidyasrees/functionaltesting.git'
+                sh 'java -jar /var/lib/jenkins/workspace/DeclarativePipeline-SCP/testing.jar'
             }
         }
-       
-    }
-    
-    post
-    {
-        success
+        stage('ContinuousDelivery')
         {
-            input message: 'Need approval from the DM!', submitter: 'srinivas'
-               deploy adapters: [tomcat9(credentialsId: 'bfb67f1d-2f4e-430c-bb8d-30584116bd00', path: '', url: 'http://172.31.50.204:9090')], contextPath: 'prod1', war: '**/*.war'
+            steps
+            {
+                sh 'scp /var/lib/jenkins/workspace/DeclarativePipeline-SCP/webapp/target/webapp.war ubuntu@172.31.3.151:/var/lib/tomcat9/webapps/prodapp.war'
+            }
         }
-        failure
-        {
-            mail bcc: '', body: 'Continuous Integration has failed', cc: '', from: '', replyTo: '', subject: 'CI Failed', to: 'selenium.saikrishna@gmail.com'
-        }
-       
+        
     }
-    
-    
-    
-    
-    
-    
 }
