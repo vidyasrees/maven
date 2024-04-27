@@ -1,44 +1,25 @@
-pipeline
+@Library('newlibrary')_
+node('built-in')
 {
-    agent any
-    stages
+    stage('ContDownload_Master')
     {
-        stage('ContinuousDownload')
-        {
-            steps
-            {
-                git 'https://github.com/vidyasrees/maven.git'
-            }
-        }
-        stage('ContinuousBuild')
-        {
-            steps
-            {
-                sh 'mvn package'
-            }
-        }
-        stage('ContinuousDeployment')
-        {
-            steps
-            {
-                sh 'scp /var/lib/jenkins/workspace/DeclarativePipeline-SCP/webapp/target/webapp.war ubuntu@172.31.5.63:/var/lib/tomcat9/webapps/testapp.war'
-            }
-        }
-        stage('ContinuousTesting')
-        {
-            steps
-            {
-                git 'https://github.com/vidyasrees/functionaltesting.git'
-                sh 'java -jar /var/lib/jenkins/workspace/DeclarativePipeline-SCP/testing.jar'
-            }
-        }
-        stage('ContinuousDelivery')
-        {
-            steps
-            {
-                sh 'scp /var/lib/jenkins/workspace/DeclarativePipeline-SCP/webapp/target/webapp.war ubuntu@172.31.3.151:/var/lib/tomcat9/webapps/prodapp.war'
-            }
-        }
-        
+        cicd.newGit("https://github.com/vidyasrees/maven.git")
+    }
+    stage('ContBuild_Master')
+    {
+        cicd.newMaven()
+    }
+    stage('ContDeployment_Master')
+    {
+        cicd.newDeploy("ScriptedPipelineSharedLibraries","172.31.5.63","Testapp")
+    }
+    stage('ContTesting_Master')
+    {
+        cicd.newGit("https://github.com/vidyasrees/functionaltesting.git")
+        cicd.runSelenium("ScriptedPipelineSharedLibraries")
+    }
+    stage('ContDelivery_Master')
+    {
+        cicd.newDeploy("ScriptedPipelineSharedLibraries","172.31.3.151","Prodapp")
     }
 }
