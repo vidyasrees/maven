@@ -1,25 +1,54 @@
-@Library('newlibrary')_
-node('built-in')
+pipeline
 {
-    stage('ContDownload_Master')
+    agent any
+    stages
     {
-        cicd.newGit("https://github.com/vidyasrees/maven.git")
-    }
-    stage('ContBuild_Master')
-    {
-        cicd.newMaven()
-    }
-    stage('ContDeployment_Master')
-    {
-        cicd.newDeploy("ScriptedPipelineSharedLibraries","172.31.5.63","Testapp")
-    }
-    stage('ContTesting_Master')
-    {
-        cicd.newGit("https://github.com/vidyasrees/functionaltesting.git")
-        cicd.runSelenium("ScriptedPipelineSharedLibraries")
-    }
-    stage('ContDelivery_Master')
-    {
-        cicd.newDeploy("ScriptedPipelineSharedLibraries","172.31.3.151","Prodapp")
+        stage('ContinuousDownload')
+        {
+            steps
+            {
+                git 'https://github.com/vidyasrees/maven.git'
+                
+            }
+        }
+        stage('ContinuousBuild')
+        {
+            steps
+            {
+                sh 'mvn package'
+                
+            }
+        }
+        stage('ContinuousDeployment')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: '4b28a9ed-422f-45fe-84d9-00972591d91e', path: '', url: 'http://172.31.44.74:8080')], contextPath: 'test1', war: '**/*.war'
+                
+            }
+        }
+        
+        stage('ContinuousTesting')
+        {
+            steps
+            {
+                git 'https://github.com/vidyasrees/functionaltesting.git'
+                sh 'java -jar /var/lib/jenkins/workspace/DescriptivePipeline/testing.jar'
+                
+            }
+        }
+        stage('ContinuousDelivery')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: '4b28a9ed-422f-45fe-84d9-00972591d91e', path: '', url: 'http://172.31.39.206:8080')], contextPath: 'prod1', war: '**/*.war'
+            }    
+        }
+        
+        
+        
+        
+        
+        
     }
 }
