@@ -24,7 +24,7 @@ pipeline
             steps
             {
 
-                 sh 'scp /var/lib/jenkins/workspace/DescriptivePipeline/webapp/target/webapp.war ubuntu@172.31.44.74:/var/lib/tomcat10/webapps/testapp.war'
+                deploy adapters: [tomcat9(credentialsId: '589632d0-c3f4-4fc0-9261-5e7f8d19ad3a', path: '', url: 'http://172.31.13.241:8080')], contextPath: 'test1', war: '**/*.war' 
                 
             }
         }
@@ -34,7 +34,7 @@ pipeline
             steps
             {
                 git 'https://github.com/vidyasrees/functionaltesting.git'
-                sh 'java -jar /var/lib/jenkins/workspace/DescriptivePipeline/testing.jar'
+                sh 'java -jar /var/lib/jenkins/workspace/DeclarativePipeline/testing.jar'
                 
             }
         }
@@ -42,7 +42,8 @@ pipeline
         {
             steps
             {
-                deploy adapters: [tomcat9(credentialsId: '4b28a9ed-422f-45fe-84d9-00972591d91e', path: '', url: 'http://172.31.39.206:8080')], contextPath: 'prod1', war: '**/*.war'
+                
+                deploy adapters: [tomcat9(credentialsId: '589632d0-c3f4-4fc0-9261-5e7f8d19ad3a', path: '', url: 'http://172.31.10.80:8080')], contextPath: 'prodapp', war: '**/*.war'
             }    
         }
         
